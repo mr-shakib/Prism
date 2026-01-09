@@ -41,3 +41,21 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Firebase & Secrets
+**/google-services.json
+**/GoogleService-Info.plist
+lib/firebase_options.dart
+firebase-debug.log
+
+# Environment & API Keys
+.env
+.env.*
+!.env.example
+**/secrets.json
+**/api_keys.dart
+**/.config/
+
+# Local configuration
+android/local.properties
+ios/Flutter/flutter_export_environment.sh
