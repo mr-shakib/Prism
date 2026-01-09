@@ -36,9 +36,13 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
     defaultConfig {
         applicationId "com.example.prism"
-        minSdkVersion 23 // Set to at least 23 as required by the firebase_auth library
+        minSdkVersion flutter.minSdkVersion // Set to at least 23 as required by the firebase_auth library
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName

@@ -13,10 +13,10 @@ This provier is to separate the firestore data handling and the UI of our app.
 
 import 'package:flutter/foundation.dart';
 import 'package:prism/services/database/database_service.dart';
-import '../../models/comment.dart';
-import '../../models/post.dart';
-import '../../models/user.dart';
-import '../auth/auth_service.dart';
+import 'package:prism/models/comment.dart';
+import 'package:prism/models/post.dart';
+import 'package:prism/models/user.dart';
+import 'package:prism/services/auth/auth_service.dart';
 
 class DatabaseProvider extends ChangeNotifier {
   /*

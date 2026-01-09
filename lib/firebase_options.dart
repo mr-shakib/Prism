@@ -50,19 +50,20 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyD-9wRoSOEWBom3SCjFhxATVI1aQckhdLU',
-    appId: '1:771188653477:android:1df7cd629eb2ff84e4bc4c',
-    messagingSenderId: '771188653477',
-    projectId: 'prism-83aad',
-    storageBucket: 'prism-83aad.appspot.com',
+    apiKey: 'AIzaSyA3eSGLlXMtWIO3dZ990FbtHvz-_chVZ0A',
+    appId: '1:449166844388:android:5f35ebcff84dee744ca7f1',
+    messagingSenderId: '449166844388',
+    projectId: 'prism-64e0f',
+    storageBucket: 'prism-64e0f.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBTZmxp1XLgF1DIJqEzwkf-i4nWbDp17d0',
-    appId: '1:771188653477:ios:cf59825498eeb3f4e4bc4c',
-    messagingSenderId: '771188653477',
-    projectId: 'prism-83aad',
-    storageBucket: 'prism-83aad.appspot.com',
+    apiKey: 'AIzaSyBtHPJXwDRnkY7y--_0lchdR6CnwbO_-cc',
+    appId: '1:449166844388:ios:949ef06727e745ec4ca7f1',
+    messagingSenderId: '449166844388',
+    projectId: 'prism-64e0f',
+    storageBucket: 'prism-64e0f.firebasestorage.app',
     iosBundleId: 'com.example.prism',
   );
+
 }
