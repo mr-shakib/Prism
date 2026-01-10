@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
 import 'package:prism/components/my_input_alert_box.dart';
 import 'package:prism/helper/time_formatter.dart';
-import 'package:provider/provider.dart';
+import 'package:get/get.dart';
 import '../models/post.dart';
 import '../services/auth/auth_service.dart';
 import '../services/database/database_provider.dart';
@@ -42,9 +42,9 @@ class MyPostTile extends StatefulWidget {
 class _MyPostTileState extends State<MyPostTile> {
   //providers
   late final listeningProvider =
-      Provider.of<DatabaseProvider>(context, listen: true);
+      Get.find<DatabaseProvider>();
   late final databaseProvider =
-      Provider.of<DatabaseProvider>(context, listen: false);
+      Get.find<DatabaseProvider>();
 
   //on startup
 

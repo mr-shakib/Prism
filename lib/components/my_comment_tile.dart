@@ -12,7 +12,7 @@ To use this widget, you need:
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:get/get.dart';
 
 import '../helper/naviagte_pages.dart';
 import '../models/comment.dart';
@@ -58,10 +58,7 @@ class MyCommentTile extends StatelessWidget {
                       Navigator.pop(context);
 
                       //handle delete action
-                      await Provider.of<DatabaseProvider>(
-                        context,
-                        listen: false,
-                      ).deleteComment(comment.id, comment.postId);
+                      await Get.find<DatabaseProvider>().deleteComment(comment.id, comment.postId);
                     },
                   )
 

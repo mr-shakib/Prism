@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:prism/components/my_comment_tile.dart';
 import 'package:prism/components/my_post_tile.dart';
 import 'package:prism/helper/naviagte_pages.dart';
-import 'package:provider/provider.dart';
+import 'package:get/get.dart';
 
 import '../models/comment.dart';
 import '../models/post.dart';
@@ -33,7 +33,7 @@ class _PostPageState extends State<PostPage> {
   @override
   void initState() {
     super.initState();
-    Provider.of<DatabaseProvider>(context, listen: false)
+    Get.find<DatabaseProvider>()
         .loadCommentsAndReplies(widget.post.id);
   }
 
@@ -46,14 +46,14 @@ class _PostPageState extends State<PostPage> {
   Future<void> _submitComment() async {
     if (_commentController.text.isNotEmpty) {
       if (_replyingToCommentId != null) {
-        await Provider.of<DatabaseProvider>(context, listen: false)
+        await Get.find<DatabaseProvider>()
             .addCommentReply(
           widget.post.id,
           _replyingToCommentId!,
           _commentController.text,
         );
       } else {
-        await Provider.of<DatabaseProvider>(context, listen: false)
+        await Get.find<DatabaseProvider>()
             .addComment(widget.post.id, _commentController.text);
       }
       _commentController.clear();
@@ -65,7 +65,7 @@ class _PostPageState extends State<PostPage> {
 
   @override
   Widget build(BuildContext context) {
-    final allComments = Provider.of<DatabaseProvider>(context, listen: true)
+    final allComments = Get.find<DatabaseProvider>()
         .getCommentsAndReplies(widget.post.id);
 
     Map<String, List<Comment>> groupedComments = {};

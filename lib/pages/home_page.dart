@@ -7,7 +7,6 @@ import 'package:prism/helper/naviagte_pages.dart';
 import 'package:prism/screens/profile_screen.dart';
 import 'package:prism/screens/search_screen.dart';
 import 'package:prism/screens/settings_screen.dart';
-import 'package:provider/provider.dart';
 import '../models/post.dart';
 import 'package:prism/screens/home_screen.dart';
 import '../services/auth/auth_service.dart';
@@ -29,12 +28,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  //provider
-  late final listeningProvider = Provider.of<DatabaseProvider>(context);
-
-  late final databaseProvider =
-      Provider.of<DatabaseProvider>(context, listen: false);
-
   //text controller
   final _messageController = TextEditingController();
 
@@ -49,11 +42,13 @@ class _HomePageState extends State<HomePage> {
 
   //load all posts
   Future<void> loadAllPosts() async {
+    final databaseProvider = Get.find<DatabaseProvider>();
     await databaseProvider.loadAllPosts();
   }
 
   //show post message box
   void _openPostMessageBox() {
+    final databaseProvider = Get.find<DatabaseProvider>();
     showDialog(
       context: context,
       builder: (context) => MyInputAlertBox(
@@ -70,6 +65,7 @@ class _HomePageState extends State<HomePage> {
 
   //user wants to post a message
   Future<void> postMessage(String message) async {
+    final databaseProvider = Get.find<DatabaseProvider>();
     await databaseProvider.postMessage(message);
   }
 
@@ -155,7 +151,10 @@ class _HomePageState extends State<HomePage> {
       //body
       // body: _buildPostList(listeningProvider.allPosts),
 
-      body: Obx(() => controller.screens[controller.selectedIndex.value]),
+      body: Obx(() {
+        final screens = controller.getScreens(context);
+        return screens[controller.selectedIndex.value];
+      }),
     );
   }
 
@@ -187,10 +186,9 @@ class NavigationController extends GetxController {
   final Rx<int> selectedIndex = 0.obs;
   final AuthService _auth = AuthService();
 
-  late final List<Widget> screens;
-
-  NavigationController() {
-    screens = [
+  // Create screens getter instead of constructor initialization
+  List<Widget> getScreens(BuildContext context) {
+    return [
       const HomeScreen(),
       const SearchScreen(),
       SettingsScreen(),

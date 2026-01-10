@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:prism/components/my_user_tile.dart';
 import 'package:prism/models/user.dart';
 import 'package:prism/services/database/database_provider.dart';
-import 'package:provider/provider.dart';
+import 'package:get/get.dart';
 
 class FollowListPage extends StatefulWidget {
   final String uid;
@@ -34,7 +34,7 @@ class _FollowListPageState extends State<FollowListPage> {
     super.didChangeDependencies();
 
     // Initialize provider here
-    databaseProvider = Provider.of<DatabaseProvider>(context, listen: false);
+    databaseProvider = Get.find<DatabaseProvider>();
 
     // Load followers and following after dependencies are ready
     loadFollowerList();

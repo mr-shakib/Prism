@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:provider/provider.dart';
+import 'package:get/get.dart';
 
 import '../components/my_user_tile.dart';
 import '../services/database/database_provider.dart';
@@ -20,9 +20,9 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     //providers
-    final databaseProvider = Provider.of<DatabaseProvider>(context);
+    final databaseProvider = Get.find<DatabaseProvider>();
     final listeningProvider =
-        Provider.of<DatabaseProvider>(context, listen: true);
+        Get.find<DatabaseProvider>();
     //SCAFOLD
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,

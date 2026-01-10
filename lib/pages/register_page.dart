@@ -48,21 +48,22 @@ class _RegisterPageState extends State<RegisterPage> {
       showLoadingCircle(context);
 
       try {
+        // Register user with Firebase Auth
         await _auth.registerEmailPassword(
           emailController.text,
           pwController.text,
         );
 
-        // Success scenario - hide loading circle and navigate
-        if (mounted) {
-          hideLoadingCircle(context);
-        }
-
-        //once registered , create and save user profile in database
+        // Save user profile in database (BEFORE hiding loading)
         await _db.saveUserInfoInFirebase(
           name: nameController.text,
           email: emailController.text,
         );
+
+        // Success - hide loading circle after everything is done
+        if (mounted) {
+          hideLoadingCircle(context);
+        }
       }
 
       //catch any errors

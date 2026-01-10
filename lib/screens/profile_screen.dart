@@ -5,7 +5,7 @@ import 'package:prism/components/my_profile_stats.dart';
 import 'package:prism/helper/naviagte_pages.dart';
 import 'package:prism/models/user.dart';
 import 'package:prism/services/auth/auth_service.dart';
-import 'package:provider/provider.dart';
+import 'package:get/get.dart';
 import '../components/my_follow_button.dart';
 import '../components/my_post_tile.dart';
 import '../pages/follow_list_page.dart';
@@ -32,11 +32,8 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfileScreen> {
   //provider
-  late final listeningProvider = Provider.of<DatabaseProvider>(context);
-  late final databaseProvider = Provider.of<DatabaseProvider>(
-    context,
-    listen: false,
-  );
+  late final listeningProvider = Get.find<DatabaseProvider>();
+  late final databaseProvider = Get.find<DatabaseProvider>();
 
   //user info
   UserProfile? user;

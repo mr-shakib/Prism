@@ -88,6 +88,33 @@ class DatabaseService {
     }
   }
 
+  //Get random users for suggestions
+  Future<List<UserProfile>> getRandomUsersFromFirebase(
+      {int limit = 5}) async {
+    try {
+      String currentUid = _auth.currentUser!.uid;
+
+      // Get all users except current user
+      QuerySnapshot snapshot = await _db
+          .collection("Users")
+          .where(FieldPath.documentId, isNotEqualTo: currentUid)
+          .limit(limit * 2) // Get more to filter
+          .get();
+
+      // Convert to list and shuffle
+      List<UserProfile> users = snapshot.docs
+          .map((doc) => UserProfile.fromDocument(doc))
+          .toList()
+        ..shuffle();
+
+      // Return limited number
+      return users.take(limit).toList();
+    } catch (e) {
+      print(e);
+      return [];
+    }
+  }
+
   //Delete user info
 
   Future<void> deleteUserInfoFromFirebase(String uid) async {
