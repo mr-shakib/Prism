@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
 import 'package:prism/components/my_input_alert_box.dart';
 import 'package:prism/helper/time_formatter.dart';
+import 'package:prism/themes/app_colors.dart';
+import 'package:prism/services/cloudinary/cloudinary_service.dart';
 import 'package:get/get.dart';
 import '../models/post.dart';
+import '../models/user.dart';
 import '../services/auth/auth_service.dart';
 import '../services/database/database_provider.dart';
 
@@ -255,6 +258,8 @@ class _MyPostTileState extends State<MyPostTile> {
   //BUILD UI
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     //does the current user liked the post
     bool likedByCurrentUser =
         listeningProvider.isPostLikedByCurrentUser(widget.post.id);
@@ -269,169 +274,360 @@ class _MyPostTileState extends State<MyPostTile> {
     return GestureDetector(
       onTap: widget.onPostTap,
       onDoubleTap: _toggleLikedPost,
-      onLongPress: () {
-        _showOptions();
-      },
+      onLongPress: _showOptions,
       child: Container(
-        //padding outside
-        margin: const EdgeInsets.symmetric(vertical: 5),
-
-        //padding inside
-        padding: const EdgeInsets.all(20),
-
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          //color of the post tile
-          color: Theme.of(context).colorScheme.secondary,
-
-          //curve corner
-          borderRadius: BorderRadius.circular(12),
-
-          // Add border
-          // border: Border.all(
-          //   color: Theme.of(context)
-          //       .colorScheme
-          //       .secondary
-          //       .withOpacity(0.5), // Adjust color as needed
-          //   width: 1.0, // Adjust width as needed
-          // ),
+          color: isDark ? AppColors.darkCard : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: (isDark ? Colors.white : Colors.black).withOpacity(0.06),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
+              blurRadius: 15,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-
-        //column
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            //Top section : profile picture, name, username
-            GestureDetector(
-              onTap: widget.onUserTap,
+            // Header: Profile info and options
+            Padding(
+              padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  //profile picture
-                  Icon(
-                    Icons.person,
-                    color: Theme.of(context).colorScheme.onPrimary,
+                  // Profile picture
+                  FutureBuilder<UserProfile?>(
+                    future: databaseProvider.userProfile(widget.post.uid),
+                    builder: (context, snapshot) {
+                      final userProfile = snapshot.data;
+                      final cloudinaryService = CloudinaryService();
+                      
+                      return GestureDetector(
+                        onTap: widget.onUserTap,
+                        child: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              colors: [Colors.purple.shade300, Colors.blue.shade300],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                          ),
+                          child: Container(
+                            margin: const EdgeInsets.all(2),
+                            child: CircleAvatar(
+                              radius: 20,
+                              backgroundColor: isDark ? AppColors.darkCard : Colors.white,
+                              backgroundImage: userProfile?.profilePictureUrl != null
+                                  ? NetworkImage(
+                                      cloudinaryService.getOptimizedImageUrl(
+                                        userProfile!.profilePictureUrl!,
+                                        width: 100,
+                                        height: 100,
+                                      ),
+                                    )
+                                  : null,
+                              child: userProfile?.profilePictureUrl == null
+                                  ? Icon(
+                                      Icons.person,
+                                      color: (isDark ? Colors.white : Colors.black).withOpacity(0.6),
+                                      size: 24,
+                                    )
+                                  : null,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
 
-                  const SizedBox(width: 20),
+                  const SizedBox(width: 12),
 
-                  //name
-                  Text(
-                    widget.post.name,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onPrimary,
-                      fontWeight: FontWeight.bold,
+                  // Name and username
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: widget.onUserTap,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.post.name,
+                            style: TextStyle(
+                              color: isDark ? AppColors.darkText : AppColors.lightText,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '@${widget.post.username}',
+                            style: TextStyle(
+                              color: (isDark ? AppColors.darkText : AppColors.lightText)
+                                  .withOpacity(0.5),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
 
-                  const SizedBox(width: 5),
-
-                  //username handle
+                  // Timestamp
                   Text(
-                    '@${widget.post.username}',
+                    formatTimestamp(widget.post.timestamp),
                     style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
+                      color: (isDark ? AppColors.darkText : AppColors.lightText)
+                          .withOpacity(0.5),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
 
-                  const Spacer(),
+                  const SizedBox(width: 8),
 
-                  //button -> more options: delete
-
-                  GestureDetector(
-                    onTap: _showOptions,
-                    child: Icon(
-                      Icons.more_horiz,
-                      color: Theme.of(context).colorScheme.primary,
+                  // More options button
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: _showOptions,
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        child: Icon(
+                          Icons.more_horiz,
+                          color: (isDark ? AppColors.darkText : AppColors.lightText)
+                              .withOpacity(0.6),
+                          size: 20,
+                        ),
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 20),
-
-            //message
-            Text(
-              widget.post.message,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            //buttons -> like, comment, share
-            Row(
-              children: [
-                //LIKE SECTION
-
-                Row(
-                  children: [
-                    //like button
-                    LikeButton(
-                      size: 40.0,
-                      isLiked: likedByCurrentUser,
-                      likeBuilder: (bool isLiked) {
-                        return Icon(
-                          isLiked ? Icons.favorite : Icons.favorite_border,
-                          color: isLiked
-                              ? Colors.red
-                              : Theme.of(context).colorScheme.primary,
-                          size: 30.0,
-                        );
-                      },
-                      onTap: (bool isLiked) async {
-                        _toggleLikedPost(); 
-                        return !isLiked;
-                      },
-                    ),
-
-                    //like count
-                    const SizedBox(width: 10),
-                    Text(
-                      likeCount != 0 ? likeCount.toString() : '',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(width: 60),
-
-                //COMMENT SECTION
-                Row(
-                  children: [
-                    //comment button
-                    GestureDetector(
-                      onTap: _openNewCommentBox,
-                      child: Icon(
-                        Icons.comment,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-
-                    const SizedBox(width: 10),
-
-                    //comment count
-                    Text(
-                      commentCount != 0 ? commentCount.toString() : '',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                  ],
-                ),
-
-                const Spacer(),
-
-                //timestamp
-                Text(
-                  formatTimestamp(widget.post.timestamp),
+            // Message/Caption
+            if (widget.post.message.trim().isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  widget.post.message,
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
+                    color: isDark ? AppColors.darkText : AppColors.lightText,
+                    fontSize: 15,
+                    height: 1.4,
                   ),
                 ),
-              ],
+              ),
+
+            if (widget.post.message.trim().isNotEmpty)
+              const SizedBox(height: 12),
+
+            // Image if available
+            if (widget.post.imageUrl != null)
+              ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
+                ),
+                child: Image.network(
+                  widget.post.imageUrl!,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(
+                      height: 300,
+                      color: (isDark ? Colors.white : Colors.black).withOpacity(0.05),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                              : null,
+                          strokeWidth: 2,
+                        ),
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      height: 200,
+                      color: (isDark ? Colors.white : Colors.black).withOpacity(0.05),
+                      child: Center(
+                        child: Icon(
+                          Icons.broken_image_outlined,
+                          size: 48,
+                          color: (isDark ? Colors.white : Colors.black).withOpacity(0.3),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+
+            // Video placeholder if available
+            if (widget.post.videoUrl != null)
+              Container(
+                height: 300,
+                decoration: BoxDecoration(
+                  color: Colors.black87,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Icon(
+                      Icons.play_circle_outline,
+                      size: 64,
+                      color: Colors.white.withOpacity(0.8),
+                    ),
+                    Positioned(
+                      bottom: 12,
+                      left: 12,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.black54,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.videocam,
+                              size: 14,
+                              color: Colors.white.withOpacity(0.9),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Video',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.9),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+            // Action buttons
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  // Like button
+                  LikeButton(
+                    size: 28,
+                    isLiked: likedByCurrentUser,
+                    circleColor: const CircleColor(
+                      start: Color(0xFFFF6868),
+                      end: Color(0xFFFF4D4D),
+                    ),
+                    bubblesColor: const BubblesColor(
+                      dotPrimaryColor: Color(0xFFFF6868),
+                      dotSecondaryColor: Color(0xFFFF4D4D),
+                    ),
+                    likeBuilder: (bool isLiked) {
+                      return Icon(
+                        isLiked ? Icons.favorite : Icons.favorite_border,
+                        color: isLiked
+                            ? Colors.red
+                            : (isDark ? AppColors.darkText : AppColors.lightText)
+                                .withOpacity(0.6),
+                        size: 28,
+                      );
+                    },
+                    onTap: (bool isLiked) async {
+                      _toggleLikedPost();
+                      return !isLiked;
+                    },
+                  ),
+
+                  if (likeCount > 0) ...[
+                    const SizedBox(width: 6),
+                    Text(
+                      likeCount.toString(),
+                      style: TextStyle(
+                        color: (isDark ? AppColors.darkText : AppColors.lightText)
+                            .withOpacity(0.7),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+
+                  const SizedBox(width: 20),
+
+                  // Comment button
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: _openNewCommentBox,
+                      borderRadius: BorderRadius.circular(20),
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
+                        child: Icon(
+                          Icons.mode_comment_outlined,
+                          color: (isDark ? AppColors.darkText : AppColors.lightText)
+                              .withOpacity(0.6),
+                          size: 26,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  if (commentCount > 0) ...[
+                    const SizedBox(width: 6),
+                    Text(
+                      commentCount.toString(),
+                      style: TextStyle(
+                        color: (isDark ? AppColors.darkText : AppColors.lightText)
+                            .withOpacity(0.7),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+
+                  const Spacer(),
+
+                  // Share button
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Share feature coming soon!')),
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(20),
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
+                        child: Icon(
+                          Icons.share_outlined,
+                          color: (isDark ? AppColors.darkText : AppColors.lightText)
+                              .withOpacity(0.6),
+                          size: 24,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

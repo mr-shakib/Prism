@@ -153,10 +153,13 @@ class _HomePageState extends State<HomePage> {
       //body
       // body: _buildPostList(listeningProvider.allPosts),
 
-      body: Obx(() {
-        final screens = controller.getScreens(context);
-        return screens[controller.selectedIndex.value];
-      }),
+      body: SafeArea(
+        top: controller.selectedIndex.value == 2,
+        child: Obx(() {
+          final screens = controller.getScreens(context);
+          return screens[controller.selectedIndex.value];
+        }),
+      ),
     );
   }
 
