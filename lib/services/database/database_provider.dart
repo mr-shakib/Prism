@@ -281,6 +281,11 @@ class DatabaseProvider extends GetxController {
     update();
   }
 
+  // Stream comments and replies (real-time updates)
+  Stream<List<Comment>> getCommentsStream(String postId) {
+    return _db.getCommentsAndRepliesStream(postId);
+  }
+
   // Add a comment reply
   Future<void> addCommentReply(
       String postId, String parentCommentId, String message) async {
@@ -418,6 +423,9 @@ class DatabaseProvider extends GetxController {
         await loadFollowers(currentUserId);
         //reload target user's following
         await loadFollowing(targetUserId);
+        
+        //refresh following posts feed
+        await loadFollowingPosts();
       } catch (e) {
         //if error, undo the changes
         _followers[targetUserId]?.remove(currentUserId);
@@ -465,6 +473,9 @@ class DatabaseProvider extends GetxController {
       await loadFollowers(currentUserId);
       //reload target user's following
       await loadFollowing(targetUserId);
+      
+      //refresh following posts feed
+      await loadFollowingPosts();
     } catch (e) {
       //if error, undo the changes
       _followers[targetUserId]?.add(currentUserId);

@@ -359,7 +359,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> with SingleTickerPr
                                _selectedImage == null && 
                                _selectedVideo == null)
                             ? (isDark ? Colors.white : Colors.black).withOpacity(0.3)
-                            : Colors.blue,
+                            : Colors.purple,
                       ),
                     ),
                   ),
@@ -525,7 +525,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> with SingleTickerPr
               _buildMediaButton(
                 Icons.location_on_outlined,
                 'Location',
-                Colors.blue,
+                Colors.purple,
                 isDark,
                 () {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -639,13 +639,13 @@ class _CreatePostScreenState extends State<CreatePostScreen> with SingleTickerPr
           gradient: LinearGradient(
             colors: isDark
                 ? [AppColors.darkCard, AppColors.darkCard.withOpacity(0.8)]
-                : [Colors.blue.shade50, Colors.purple.shade50],
+                : [Colors.purple.shade50, Colors.deepPurple.shade50],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: Colors.blue.withOpacity(0.3),
+            color: Colors.purple.withOpacity(0.3),
             width: 1.5,
           ),
         ),
@@ -663,7 +663,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> with SingleTickerPr
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [Colors.blue, Colors.purple],
+                            colors: [Colors.purple, Colors.deepPurple],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
@@ -717,7 +717,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> with SingleTickerPr
                     minHeight: 8,
                     backgroundColor: (isDark ? Colors.white : Colors.black).withOpacity(0.1),
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      Color.lerp(Colors.blue, Colors.purple, value) ?? Colors.blue,
+                      Color.lerp(Colors.purple, Colors.deepPurple, value) ?? Colors.purple,
                     ),
                   );
                 },

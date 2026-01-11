@@ -123,7 +123,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: LinearGradient(
-                  colors: [Colors.purple.shade300, Colors.blue.shade300],
+                  colors: [Colors.purple.shade300, Colors.purple.shade400],
                 ),
               ),
               child: Container(
@@ -349,8 +349,8 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                   gradient: isSender
                       ? LinearGradient(
                           colors: [
-                            Colors.blue.shade400,
                             Colors.purple.shade400,
+                            Colors.purple.shade500,
                           ],
                         )
                       : null,
@@ -392,7 +392,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                     message.isRead ? Icons.done_all : Icons.done,
                     size: 14,
                     color: message.isRead
-                        ? Colors.blue
+                        ? Colors.purple
                         : (isDark ? AppColors.darkText : AppColors.lightText)
                             .withOpacity(0.4),
                   ),
@@ -427,7 +427,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                 Icons.image_outlined,
                 color: _isSending
                     ? (isDark ? Colors.white : Colors.black).withOpacity(0.3)
-                    : Colors.blue,
+                    : Colors.purple,
               ),
             ),
             Expanded(
@@ -470,7 +470,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                       Icons.send,
                       color: _messageController.text.trim().isEmpty
                           ? (isDark ? Colors.white : Colors.black).withOpacity(0.3)
-                          : Colors.blue,
+                          : Colors.purple,
                     ),
                   ),
           ],

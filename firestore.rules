@@ -22,6 +22,18 @@ service cloud.firestore {
       match /BlockedUsers/{blockedUserId} {
         allow read, write: if isOwner(userId);
       }
+      
+      // Following subcollection
+      match /Following/{followedUserId} {
+        allow read: if isSignedIn();
+        allow write: if isOwner(userId);
+      }
+      
+      // Followers subcollection
+      match /Followers/{followerId} {
+        allow read: if isSignedIn();
+        allow write: if isSignedIn();
+      }
     }
     
     // Posts collection
@@ -38,15 +50,27 @@ service cloud.firestore {
       }
     }
     
+    // Comments collection (top-level)
+    match /Comments/{commentId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isOwner(resource.data.uid);
+    }
+    
     // Chats collection
     match /Chats/{chatId} {
       // Allow read if user is a participant
+      // For new chats being created, check request.resource.data
+      // For existing chats, check resource.data
       allow read: if isSignedIn() && 
-                     request.auth.uid in resource.data.participants;
+                     (resource == null || 
+                      request.auth.uid in resource.data.participants ||
+                      request.auth.uid in get(/databases/$(database)/documents/Chats/$(chatId)).data.participants);
       
-      // Allow create if user is one of the participants
+      // Allow create if user is one of the participants in the new document
       allow create: if isSignedIn() && 
-                       request.auth.uid in request.resource.data.participants;
+                       request.auth.uid in request.resource.data.participants &&
+                       request.resource.data.participants.size() == 2;
       
       // Allow update if user is a participant (for updating lastMessage, etc.)
       allow update: if isSignedIn() && 

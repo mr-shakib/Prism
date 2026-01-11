@@ -434,6 +434,33 @@ class DatabaseService {
       return [];
     }
   }
+
+  // Stream comments and replies for a post (real-time updates)
+  Stream<List<Comment>> getCommentsAndRepliesStream(String postId) {
+    return _db
+        .collection("Comments")
+        .where('postId', isEqualTo: postId)
+        .snapshots()
+        .map((snapshot) {
+      List<Comment> comments =
+          snapshot.docs.map((doc) => Comment.fromDocument(doc)).toList();
+
+      // Sort comments: top-level comments first, then replies
+      comments.sort((a, b) {
+        if (a.parentCommentId == null && b.parentCommentId == null) {
+          return b.timestamp.compareTo(a.timestamp);
+        } else if (a.parentCommentId == null) {
+          return -1;
+        } else if (b.parentCommentId == null) {
+          return 1;
+        } else {
+          return a.timestamp.compareTo(b.timestamp);
+        }
+      });
+
+      return comments;
+    });
+  }
   /* 
   
   ACCOUNT SETTINGS

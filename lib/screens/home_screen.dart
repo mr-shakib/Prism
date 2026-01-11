@@ -117,12 +117,13 @@ class _HomePageState extends State<HomeScreen> {
               Expanded(
                 child: TabBarView(
                   children: [
+                    // For You tab - all posts
                     _buildPostList(
-                      listeningProvider.allPosts, // For "For You" tab
+                      listeningProvider.allPosts,
+                      isFollowingTab: false,
                     ),
-                    _buildPostList(
-                      listeningProvider.followingPosts, // For "Following" tab
-                    ),
+                    // Following tab - posts from followed users or suggestions
+                    _buildFollowingTabContent(listeningProvider),
                   ],
                 ),
               ),
@@ -135,10 +136,35 @@ class _HomePageState extends State<HomeScreen> {
 
   //build list UI give a list of posts
 
+  // Build Following tab content - shows posts or suggestions based on following count
+  Widget _buildFollowingTabContent(DatabaseProvider databaseProvider) {
+    final currentUserId = _auth.currentUser!.uid;
+    final followingCount = databaseProvider.getFollowingCount(currentUserId);
+    
+    // If not following anyone, show suggestions
+    if (followingCount == 0) {
+      return _buildSuggestedUsersList();
+    }
+    
+    // If following people, show their posts
+    return _buildPostList(
+      databaseProvider.followingPosts,
+      isFollowingTab: true,
+    );
+  }
+
 // Your build post list function
-  Widget _buildPostList(List<Post> posts) {
+  Widget _buildPostList(List<Post> posts, {required bool isFollowingTab}) {
     if (posts.isEmpty) {
-      // Check if user is new (not following anyone)
+      // For "Following" tab when user follows people but posts haven't loaded yet
+      if (isFollowingTab) {
+        return ListView.builder(
+          itemCount: 5,
+          itemBuilder: (context, index) => _buildShimmerPlaceholder(),
+        );
+      }
+      
+      // For "For You" tab - check if user is new (not following anyone)
       final databaseProvider = Get.find<DatabaseProvider>();
       final currentUser = _auth.currentUser!.uid;
       
@@ -346,6 +372,8 @@ class _HomePageState extends State<HomeScreen> {
             } else {
               await databaseProvider.followUser(user.uid);
             }
+            // Force rebuild to update UI
+            setState(() {});
           },
           isFollowing: isFollowing,
         ),

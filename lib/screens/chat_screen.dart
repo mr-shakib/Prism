@@ -151,7 +151,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
-                    colors: [Colors.purple.shade300, Colors.blue.shade300],
+                    colors: [Colors.purple.shade300, Colors.purple.shade400],
                   ),
                 ),
                 child: Container(
@@ -213,7 +213,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     style: TextStyle(
                       fontSize: 12,
                       color: isUnread
-                          ? Colors.blue
+                          ? Colors.purple
                           : (isDark ? AppColors.darkText : AppColors.lightText)
                               .withOpacity(0.5),
                       fontWeight: isUnread ? FontWeight.w600 : FontWeight.w400,
@@ -224,7 +224,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.blue,
+                        color: Colors.purple,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(

@@ -6,7 +6,9 @@ import 'package:prism/models/user.dart';
 import 'package:prism/services/auth/auth_service.dart';
 import 'package:prism/services/cloudinary/cloudinary_service.dart';
 import 'package:prism/services/database/database_provider.dart';
+import 'package:prism/services/chat/chat_service.dart';
 import 'package:prism/screens/settings_screen.dart';
+import 'package:prism/screens/chat_conversation_screen.dart';
 import 'package:prism/themes/app_colors.dart';
 import 'package:prism/themes/app_styles.dart';
 
@@ -251,6 +253,22 @@ class _ModernProfilePageState extends State<ModernProfilePage> {
         controller: _scrollController,
         physics: const BouncingScrollPhysics(),
         slivers: [
+              // Back button for other users' profiles
+              if (!isOwnProfile)
+                SliverToBoxAdapter(
+                  child: SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.arrow_back_ios_new,
+                          color: isDark ? AppColors.darkText : AppColors.lightText,
+                        ),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ),
+                  ),
+                ),
               
               // Floating Profile Card
               SliverToBoxAdapter(
@@ -557,7 +575,29 @@ class _ModernProfilePageState extends State<ModernProfilePage> {
               flex: 2,
               child: _buildMinimalButton(
                 label: 'Message',
-                onTap: () {},
+                onTap: () async {
+                  try {
+                    final chatService = ChatService();
+                    final chatId = await chatService.getOrCreateChat(widget.uid);
+                    if (context.mounted && user != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ChatConversationScreen(
+                            otherUser: user!,
+                            chatId: chatId,
+                          ),
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Failed to start chat: $e')),
+                      );
+                    }
+                  }
+                },
                 isPrimary: false,
                 isDark: isDark,
               ),
@@ -714,6 +754,9 @@ class _ModernProfilePageState extends State<ModernProfilePage> {
         itemCount: allUserPost.length,
         itemBuilder: (context, index) {
           final post = allUserPost[index];
+          final hasImage = post.imageUrl != null && post.imageUrl!.isNotEmpty;
+          final hasVideo = post.videoUrl != null && post.videoUrl!.isNotEmpty;
+          
           return Material(
             color: Colors.transparent,
             child: InkWell(
@@ -731,14 +774,71 @@ class _ModernProfilePageState extends State<ModernProfilePage> {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Center(
-                      child: Icon(
-                        Icons.image_outlined,
-                        color: (isDark ? Colors.white : Colors.black).withOpacity(0.2),
-                        size: 32,
+                    // Show post image if available
+                    if (hasImage)
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Image.network(
+                          post.imageUrl!,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Center(
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes != null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes!
+                                    : null,
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return Center(
+                              child: Icon(
+                                Icons.broken_image,
+                                color: (isDark ? Colors.white : Colors.black).withOpacity(0.3),
+                                size: 32,
+                              ),
+                            );
+                          },
+                        ),
+                      )
+                    // Show video icon if video
+                    else if (hasVideo)
+                      Center(
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: (isDark ? Colors.white : Colors.black).withOpacity(0.7),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.play_arrow,
+                            color: isDark ? Colors.black : Colors.white,
+                            size: 32,
+                          ),
+                        ),
+                      )
+                    // Show text icon for text-only posts
+                    else
+                      Center(
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          child: Text(
+                            post.message,
+                            maxLines: 5,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: (isDark ? Colors.white : Colors.black).withOpacity(0.6),
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                    if (post.likes.isNotEmpty)
+                    
+                    // Likes overlay
+                    if (post.likedBy.isNotEmpty)
                       Positioned(
                         bottom: 8,
                         right: 8,
@@ -761,7 +861,7 @@ class _ModernProfilePageState extends State<ModernProfilePage> {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                '${post.likes.length}',
+                                '${post.likedBy.length}',
                                 style: TextStyle(
                                   color: isDark ? Colors.black : Colors.white,
                                   fontSize: 11,

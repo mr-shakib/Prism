@@ -315,7 +315,7 @@ class _MyPostTileState extends State<MyPostTile> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             gradient: LinearGradient(
-                              colors: [Colors.purple.shade300, Colors.blue.shade300],
+                              colors: [Colors.purple.shade300, Colors.purple.shade400],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
