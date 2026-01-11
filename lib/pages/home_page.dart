@@ -7,6 +7,7 @@ import 'package:prism/helper/naviagte_pages.dart';
 import 'package:prism/screens/profile_screen.dart';
 import 'package:prism/screens/search_screen.dart';
 import 'package:prism/screens/settings_screen.dart';
+import 'package:prism/screens/create_post_screen.dart';
 import '../models/post.dart';
 import 'package:prism/screens/home_screen.dart';
 import '../services/auth/auth_service.dart';
@@ -101,6 +102,12 @@ class _HomePageState extends State<HomePage> {
             ),
             Container(
               child: const NavigationDestination(
+                icon: Icon(Icons.add_box_outlined),
+                label: 'Create',
+              ),
+            ),
+            Container(
+              child: const NavigationDestination(
                 icon: const Icon(Icons.settings),
                 label: 'Settings',
               ),
@@ -115,38 +122,33 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
 
-      //App Bar
-      appBar: AppBar(
-        title: ShaderMask(
-          shaderCallback: (bounds) => const LinearGradient(
-            colors: [
-              Colors.purple,
-              Colors.blue
-            ], // Define your gradient colors here
-            tileMode: TileMode.mirror,
-          ).createShader(bounds),
-          child: const Text(
-            "P R I S M",
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors
-                  .white, // The text color will be replaced by the gradient
+      //App Bar - conditionally show
+      appBar: controller.selectedIndex.value == 2
+          ? null
+          : AppBar(
+              title: ShaderMask(
+                shaderCallback: (bounds) => const LinearGradient(
+                  colors: [
+                    Colors.purple,
+                    Colors.blue
+                  ], // Define your gradient colors here
+                  tileMode: TileMode.mirror,
+                ).createShader(bounds),
+                child: const Text(
+                  "P R I S M",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors
+                        .white, // The text color will be replaced by the gradient
+                  ),
+                ),
+              ),
+              backgroundColor: Colors
+                  .transparent, // Set transparent background to see the gradient effect
+              elevation: 0, // Optional: remove shadow
+              centerTitle: true,
             ),
-          ),
-        ),
-        backgroundColor: Colors
-            .transparent, // Set transparent background to see the gradient effect
-        elevation: 0, // Optional: remove shadow
-        centerTitle: true,
-      ),
-
-      //Floating action button
-      floatingActionButton: FloatingActionButton(
-        onPressed: _openPostMessageBox,
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        child: const Icon(Icons.add),
-      ),
 
       //body
       // body: _buildPostList(listeningProvider.allPosts),
@@ -191,6 +193,7 @@ class NavigationController extends GetxController {
     return [
       const HomeScreen(),
       const SearchScreen(),
+      const CreatePostScreen(),
       SettingsScreen(),
       ProfileScreen(
         uid: _auth.getCurrentUid(),

@@ -107,18 +107,69 @@ class CloudinaryService {
   /// Upload post image to Cloudinary
   Future<String?> uploadPostImage(XFile imageFile, String postId) async {
     try {
+      print('Uploading post image to prism_posts preset');
       CloudinaryResponse response = await cloudinary.uploadFile(
         CloudinaryFile.fromFile(
           imageFile.path,
-          folder: 'prism/posts',
-          publicId: 'post_$postId',
+          folder: 'prism_posts',
+          publicId: 'post_${postId}_${DateTime.now().millisecondsSinceEpoch}',
           resourceType: CloudinaryResourceType.Image,
         ),
       );
       
+      print('Post image uploaded: ${response.secureUrl}');
       return response.secureUrl;
     } catch (e) {
       print('Error uploading post image: $e');
+      return null;
+    }
+  }
+
+  /// Upload post video to Cloudinary
+  Future<String?> uploadPostVideo(XFile videoFile, String postId) async {
+    try {
+      print('Uploading post video to prism_posts preset');
+      CloudinaryResponse response = await cloudinary.uploadFile(
+        CloudinaryFile.fromFile(
+          videoFile.path,
+          folder: 'prism_posts',
+          publicId: 'video_${postId}_${DateTime.now().millisecondsSinceEpoch}',
+          resourceType: CloudinaryResourceType.Video,
+        ),
+      );
+      
+      print('Post video uploaded: ${response.secureUrl}');
+      return response.secureUrl;
+    } catch (e) {
+      print('Error uploading post video: $e');
+      return null;
+    }
+  }
+
+  /// Pick video from gallery
+  Future<XFile?> pickVideoFromGallery() async {
+    try {
+      final XFile? video = await _picker.pickVideo(
+        source: ImageSource.gallery,
+        maxDuration: const Duration(minutes: 5),
+      );
+      return video;
+    } catch (e) {
+      print('Error picking video: $e');
+      return null;
+    }
+  }
+
+  /// Pick video from camera
+  Future<XFile?> pickVideoFromCamera() async {
+    try {
+      final XFile? video = await _picker.pickVideo(
+        source: ImageSource.camera,
+        maxDuration: const Duration(minutes: 5),
+      );
+      return video;
+    } catch (e) {
+      print('Error recording video: $e');
       return null;
     }
   }

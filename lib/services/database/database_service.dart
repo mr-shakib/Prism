@@ -194,7 +194,7 @@ class DatabaseService {
   */
 
   //post a message
-  Future<void> postMessageInFirebase(String message) async {
+  Future<void> postMessageInFirebase(String message, {String? imageUrl, String? videoUrl}) async {
     try {
       String uid = _auth.currentUser!.uid;
 
@@ -212,6 +212,8 @@ class DatabaseService {
         timestamp: Timestamp.now(),
         likeCount: 0,
         likedBy: [],
+        imageUrl: imageUrl,
+        videoUrl: videoUrl,
       );
 
       //convert post into a map so that we can store in firebase

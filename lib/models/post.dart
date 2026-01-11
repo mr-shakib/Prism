@@ -15,6 +15,8 @@ class Post {
   final Timestamp timestamp;
   final int likeCount;
   final List<String> likedBy;
+  final String? imageUrl;
+  final String? videoUrl;
 
   Post({
     required this.id,
@@ -25,6 +27,8 @@ class Post {
     required this.timestamp,
     required this.likeCount,
     required this.likedBy,
+    this.imageUrl,
+    this.videoUrl,
   });
 
   //convert a Firestore document to a post
@@ -38,6 +42,8 @@ class Post {
       timestamp: doc['timestamp'],
       likeCount: doc['likeCount'],
       likedBy: List<String>.from(doc['likedBy'] ?? []),
+      imageUrl: doc.data().toString().contains('imageUrl') ? doc['imageUrl'] : null,
+      videoUrl: doc.data().toString().contains('videoUrl') ? doc['videoUrl'] : null,
     );
   }
 
@@ -51,6 +57,8 @@ class Post {
       'timestamp': timestamp,
       'likeCount': likeCount,
       'likedBy': likedBy,
+      if (imageUrl != null) 'imageUrl': imageUrl,
+      if (videoUrl != null) 'videoUrl': videoUrl,
     };
   }
 }

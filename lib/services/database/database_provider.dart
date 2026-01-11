@@ -87,9 +87,9 @@ class DatabaseProvider extends GetxController {
   List<Post> get followingPosts => _followingPosts;
 
   //post message
-  Future<void> postMessage(String message) async {
+  Future<void> postMessage(String message, {String? imageUrl, String? videoUrl}) async {
     //post message in firebase
-    await _db.postMessageInFirebase(message);
+    await _db.postMessageInFirebase(message, imageUrl: imageUrl, videoUrl: videoUrl);
 
     //reload all posts
     await loadAllPosts();
