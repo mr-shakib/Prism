@@ -38,8 +38,23 @@ class DatabaseProvider extends GetxController {
   Future<UserProfile?> userProfile(String uid) =>
       _db.getUserInfoFromFirestore(uid);
 
+  //save user info to firestore
+  Future<void> saveUserInfoInFirebase({
+    required String name,
+    required String email,
+  }) =>
+      _db.saveUserInfoInFirebase(name: name, email: email);
+
   //update the user bio
   Future<void> updateBio(String bio) => _db.updateUserBioInFirebase(bio);
+
+  //update profile picture
+  Future<void> updateProfilePicture(String imageUrl) =>
+      _db.updateProfilePicture(imageUrl);
+
+  //update cover photo
+  Future<void> updateCoverPhoto(String imageUrl) =>
+      _db.updateCoverPhoto(imageUrl);
 
   //Delete user info
 

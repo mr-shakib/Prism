@@ -88,6 +88,30 @@ class DatabaseService {
     }
   }
 
+  //update profile picture
+  Future<void> updateProfilePicture(String imageUrl) async {
+    String uid = AuthService().getCurrentUid();
+    try {
+      await _db.collection("Users").doc(uid).update({
+        "profilePictureUrl": imageUrl,
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  //update cover photo
+  Future<void> updateCoverPhoto(String imageUrl) async {
+    String uid = AuthService().getCurrentUid();
+    try {
+      await _db.collection("Users").doc(uid).update({
+        "coverPhotoUrl": imageUrl,
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
   //Get random users for suggestions
   Future<List<UserProfile>> getRandomUsersFromFirebase(
       {int limit = 5}) async {
