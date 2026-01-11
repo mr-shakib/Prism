@@ -7,7 +7,8 @@ import 'package:prism/helper/naviagte_pages.dart';
 import 'package:prism/screens/profile_screen.dart';
 import 'package:prism/screens/search_screen.dart';
 import 'package:prism/screens/settings_screen.dart';
-import 'package:provider/provider.dart';
+import 'package:prism/screens/create_post_screen.dart';
+import 'package:prism/screens/chat_screen.dart';
 import '../models/post.dart';
 import 'package:prism/screens/home_screen.dart';
 import '../services/auth/auth_service.dart';
@@ -29,12 +30,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  //provider
-  late final listeningProvider = Provider.of<DatabaseProvider>(context);
-
-  late final databaseProvider =
-      Provider.of<DatabaseProvider>(context, listen: false);
-
   //text controller
   final _messageController = TextEditingController();
 
@@ -49,11 +44,13 @@ class _HomePageState extends State<HomePage> {
 
   //load all posts
   Future<void> loadAllPosts() async {
+    final databaseProvider = Get.find<DatabaseProvider>();
     await databaseProvider.loadAllPosts();
   }
 
   //show post message box
   void _openPostMessageBox() {
+    final databaseProvider = Get.find<DatabaseProvider>();
     showDialog(
       context: context,
       builder: (context) => MyInputAlertBox(
@@ -70,6 +67,7 @@ class _HomePageState extends State<HomePage> {
 
   //user wants to post a message
   Future<void> postMessage(String message) async {
+    final databaseProvider = Get.find<DatabaseProvider>();
     await databaseProvider.postMessage(message);
   }
 
@@ -105,8 +103,14 @@ class _HomePageState extends State<HomePage> {
             ),
             Container(
               child: const NavigationDestination(
-                icon: const Icon(Icons.settings),
-                label: 'Settings',
+                icon: Icon(Icons.add_box_outlined),
+                label: 'Create',
+              ),
+            ),
+            Container(
+              child: const NavigationDestination(
+                icon: Icon(Icons.chat_bubble_outline),
+                label: 'Chat',
               ),
             ),
             Container(
@@ -119,43 +123,44 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
 
-      //App Bar
-      appBar: AppBar(
-        title: ShaderMask(
-          shaderCallback: (bounds) => const LinearGradient(
-            colors: [
-              Colors.purple,
-              Colors.blue
-            ], // Define your gradient colors here
-            tileMode: TileMode.mirror,
-          ).createShader(bounds),
-          child: const Text(
-            "P R I S M",
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors
-                  .white, // The text color will be replaced by the gradient
+      //App Bar - conditionally show
+      appBar: controller.selectedIndex.value == 2
+          ? null
+          : AppBar(
+              title: ShaderMask(
+                shaderCallback: (bounds) => const LinearGradient(
+                  colors: [
+                    Colors.purple,
+                    Colors.blue
+                  ], // Define your gradient colors here
+                  tileMode: TileMode.mirror,
+                ).createShader(bounds),
+                child: const Text(
+                  "P R I S M",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors
+                        .white, // The text color will be replaced by the gradient
+                  ),
+                ),
+              ),
+              backgroundColor: Colors
+                  .transparent, // Set transparent background to see the gradient effect
+              elevation: 0, // Optional: remove shadow
+              centerTitle: true,
             ),
-          ),
-        ),
-        backgroundColor: Colors
-            .transparent, // Set transparent background to see the gradient effect
-        elevation: 0, // Optional: remove shadow
-        centerTitle: true,
-      ),
-
-      //Floating action button
-      floatingActionButton: FloatingActionButton(
-        onPressed: _openPostMessageBox,
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        child: const Icon(Icons.add),
-      ),
 
       //body
       // body: _buildPostList(listeningProvider.allPosts),
 
-      body: Obx(() => controller.screens[controller.selectedIndex.value]),
+      body: SafeArea(
+        top: controller.selectedIndex.value == 2,
+        child: Obx(() {
+          final screens = controller.getScreens(context);
+          return screens[controller.selectedIndex.value];
+        }),
+      ),
     );
   }
 
@@ -187,13 +192,13 @@ class NavigationController extends GetxController {
   final Rx<int> selectedIndex = 0.obs;
   final AuthService _auth = AuthService();
 
-  late final List<Widget> screens;
-
-  NavigationController() {
-    screens = [
+  // Create screens getter instead of constructor initialization
+  List<Widget> getScreens(BuildContext context) {
+    return [
       const HomeScreen(),
       const SearchScreen(),
-      SettingsScreen(),
+      const CreatePostScreen(),
+      const ChatScreen(),
       ProfileScreen(
         uid: _auth.getCurrentUid(),
       ),

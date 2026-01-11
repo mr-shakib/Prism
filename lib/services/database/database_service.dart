@@ -88,6 +88,57 @@ class DatabaseService {
     }
   }
 
+  //update profile picture
+  Future<void> updateProfilePicture(String imageUrl) async {
+    String uid = AuthService().getCurrentUid();
+    try {
+      await _db.collection("Users").doc(uid).update({
+        "profilePictureUrl": imageUrl,
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  //update cover photo
+  Future<void> updateCoverPhoto(String imageUrl) async {
+    String uid = AuthService().getCurrentUid();
+    try {
+      await _db.collection("Users").doc(uid).update({
+        "coverPhotoUrl": imageUrl,
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  //Get random users for suggestions
+  Future<List<UserProfile>> getRandomUsersFromFirebase(
+      {int limit = 5}) async {
+    try {
+      String currentUid = _auth.currentUser!.uid;
+
+      // Get all users except current user
+      QuerySnapshot snapshot = await _db
+          .collection("Users")
+          .where(FieldPath.documentId, isNotEqualTo: currentUid)
+          .limit(limit * 2) // Get more to filter
+          .get();
+
+      // Convert to list and shuffle
+      List<UserProfile> users = snapshot.docs
+          .map((doc) => UserProfile.fromDocument(doc))
+          .toList()
+        ..shuffle();
+
+      // Return limited number
+      return users.take(limit).toList();
+    } catch (e) {
+      print(e);
+      return [];
+    }
+  }
+
   //Delete user info
 
   Future<void> deleteUserInfoFromFirebase(String uid) async {
@@ -143,7 +194,7 @@ class DatabaseService {
   */
 
   //post a message
-  Future<void> postMessageInFirebase(String message) async {
+  Future<void> postMessageInFirebase(String message, {String? imageUrl, String? videoUrl}) async {
     try {
       String uid = _auth.currentUser!.uid;
 
@@ -161,6 +212,8 @@ class DatabaseService {
         timestamp: Timestamp.now(),
         likeCount: 0,
         likedBy: [],
+        imageUrl: imageUrl,
+        videoUrl: videoUrl,
       );
 
       //convert post into a map so that we can store in firebase
@@ -380,6 +433,33 @@ class DatabaseService {
     } catch (e) {
       return [];
     }
+  }
+
+  // Stream comments and replies for a post (real-time updates)
+  Stream<List<Comment>> getCommentsAndRepliesStream(String postId) {
+    return _db
+        .collection("Comments")
+        .where('postId', isEqualTo: postId)
+        .snapshots()
+        .map((snapshot) {
+      List<Comment> comments =
+          snapshot.docs.map((doc) => Comment.fromDocument(doc)).toList();
+
+      // Sort comments: top-level comments first, then replies
+      comments.sort((a, b) {
+        if (a.parentCommentId == null && b.parentCommentId == null) {
+          return b.timestamp.compareTo(a.timestamp);
+        } else if (a.parentCommentId == null) {
+          return -1;
+        } else if (b.parentCommentId == null) {
+          return 1;
+        } else {
+          return a.timestamp.compareTo(b.timestamp);
+        }
+      });
+
+      return comments;
+    });
   }
   /* 
   

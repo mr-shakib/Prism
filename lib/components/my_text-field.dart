@@ -101,7 +101,7 @@ class _MyTextFieldState extends State<MyTextField>
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(
-                      color: Colors.deepPurple,
+                      color: Theme.of(context).colorScheme.primary,
                       width: 1.0 + _animation.value,
                     ),
                     borderRadius: BorderRadius.circular(12),

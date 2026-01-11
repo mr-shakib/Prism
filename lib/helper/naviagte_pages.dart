@@ -1,6 +1,6 @@
 //go to user page
 import 'package:flutter/material.dart';
-import 'package:prism/screens/profile_screen.dart';
+import 'package:prism/pages/modern_profile_page.dart';
 
 import '../models/post.dart';
 import '../pages/account_settings_page.dart';
@@ -12,7 +12,7 @@ void goUserPage(BuildContext context, String uid) {
   Navigator.push(
     context,
     MaterialPageRoute(
-      builder: (context) => ProfileScreen(uid: uid),
+      builder: (context) => ModernProfilePage(uid: uid),
     ),
   );
 }

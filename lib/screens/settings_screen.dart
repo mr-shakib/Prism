@@ -14,19 +14,29 @@ class SettingsScreen extends StatelessWidget {
   final _auth = AuthService();
 
   //logout
-  void _logout() async {
-    _auth.logout();
+  void _logout(BuildContext context) async {
+    await _auth.logout();
+    // Navigate back to auth gate (login screen)
+    if (context.mounted) {
+      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      body: Column(
-        children: [
-          // Dark Mode
+      appBar: AppBar(
+        title: const Text('Settings'),
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        elevation: 0,
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Dark Mode
 
-          MySettingsTile(
+            MySettingsTile(
             title: "Dark Mode",
             action: CupertinoSwitch(
               onChanged: (value) => Provider.of<ThemeProvider>(context, listen: false).toggleTheme(),
@@ -64,9 +74,10 @@ class SettingsScreen extends StatelessWidget {
           MySettingsTile(
             title: "L O G O U T",
             icon: Icons.logout,
-            onTap: _logout,
+            onTap: () => _logout(context),
           ),
-        ],
+          ],
+        ),
       ),
     );
   }

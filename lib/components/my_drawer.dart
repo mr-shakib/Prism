@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:prism/components/my_drawer_tile.dart';
-import 'package:prism/pages/profile_page.dart';
+import 'package:prism/pages/modern_profile_page.dart';
 
 import '../pages/settings_page.dart';
 import '../services/auth/auth_service.dart';
@@ -84,7 +84,7 @@ class MyDrawer extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ProfilePage(
+                      builder: (context) => ModernProfilePage(
                         uid: _auth.getCurrentUid(),
                       ),
                     ),

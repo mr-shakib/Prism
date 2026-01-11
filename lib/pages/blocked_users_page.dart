@@ -6,7 +6,7 @@ Blocked Users Page
 
 import 'package:flutter/material.dart';
 import 'package:prism/services/database/database_provider.dart';
-import 'package:provider/provider.dart';
+import 'package:get/get.dart';
 
 class BlockedUsersPage extends StatefulWidget {
   const BlockedUsersPage({super.key});
@@ -17,9 +17,9 @@ class BlockedUsersPage extends StatefulWidget {
 
 class _BlockedUsersPageState extends State<BlockedUsersPage> {
   //providers
-  late final listeningProvider = Provider.of<DatabaseProvider>(context);
+  late final listeningProvider = Get.find<DatabaseProvider>();
   late final databaseProvider =
-      Provider.of<DatabaseProvider>(context, listen: false);
+      Get.find<DatabaseProvider>();
 
   //on startup
   @override

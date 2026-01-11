@@ -25,6 +25,7 @@ class AuthService {
   //get curent user and id
   User? get currentUser => _auth.currentUser;
   String getCurrentUid() => _auth.currentUser!.uid;
+  String? getCurrentUserEmail() => _auth.currentUser?.email;
 
   //login email & pw
   Future<UserCredential> loginEmailPassword(String email, String pw) async {

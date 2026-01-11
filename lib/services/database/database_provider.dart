@@ -11,14 +11,14 @@ This provier is to separate the firestore data handling and the UI of our app.
 
 */
 
-import 'package:flutter/foundation.dart';
+import 'package:get/get.dart';
 import 'package:prism/services/database/database_service.dart';
 import 'package:prism/models/comment.dart';
 import 'package:prism/models/post.dart';
 import 'package:prism/models/user.dart';
 import 'package:prism/services/auth/auth_service.dart';
 
-class DatabaseProvider extends ChangeNotifier {
+class DatabaseProvider extends GetxController {
   /*
   
   SERVICES
@@ -38,10 +38,37 @@ class DatabaseProvider extends ChangeNotifier {
   Future<UserProfile?> userProfile(String uid) =>
       _db.getUserInfoFromFirestore(uid);
 
+  //save user info to firestore
+  Future<void> saveUserInfoInFirebase({
+    required String name,
+    required String email,
+  }) =>
+      _db.saveUserInfoInFirebase(name: name, email: email);
+
   //update the user bio
   Future<void> updateBio(String bio) => _db.updateUserBioInFirebase(bio);
 
+  //update profile picture
+  Future<void> updateProfilePicture(String imageUrl) =>
+      _db.updateProfilePicture(imageUrl);
+
+  //update cover photo
+  Future<void> updateCoverPhoto(String imageUrl) =>
+      _db.updateCoverPhoto(imageUrl);
+
   //Delete user info
+
+  //Suggested users list
+  List<UserProfile> _suggestedUsers = [];
+
+  //get suggested users
+  List<UserProfile> get suggestedUsers => _suggestedUsers;
+
+  //load suggested random users
+  Future<void> loadSuggestedUsers() async {
+    _suggestedUsers = await _db.getRandomUsersFromFirebase();
+    update();
+  }
 
   /* 
   
@@ -60,9 +87,9 @@ class DatabaseProvider extends ChangeNotifier {
   List<Post> get followingPosts => _followingPosts;
 
   //post message
-  Future<void> postMessage(String message) async {
+  Future<void> postMessage(String message, {String? imageUrl, String? videoUrl}) async {
     //post message in firebase
-    await _db.postMessageInFirebase(message);
+    await _db.postMessageInFirebase(message, imageUrl: imageUrl, videoUrl: videoUrl);
 
     //reload all posts
     await loadAllPosts();
@@ -87,7 +114,7 @@ class DatabaseProvider extends ChangeNotifier {
     initializeLikeMap();
 
     //update the UI
-    notifyListeners();
+    update();
   }
 
   //filter and return post given uid
@@ -108,7 +135,7 @@ class DatabaseProvider extends ChangeNotifier {
         _allPosts.where((post) => followingUids.contains(post.uid)).toList();
 
     //update the UI
-    notifyListeners();
+    update();
   }
 
   //delete post
@@ -185,7 +212,7 @@ class DatabaseProvider extends ChangeNotifier {
     }
 
     //update the UI
-    notifyListeners();
+    update();
 
     /*
     
@@ -200,7 +227,7 @@ class DatabaseProvider extends ChangeNotifier {
     } catch (e) {
       _likedPosts = likedPostsOriginal;
       _likeCounts = likeCountsOriginal;
-      notifyListeners();
+      update();
       print(e);
     }
   }
@@ -224,7 +251,7 @@ class DatabaseProvider extends ChangeNotifier {
     _comments[postId] = allComments;
 
     //update UI
-    notifyListeners();
+    update();
   }
 
   // add a comment
@@ -251,7 +278,12 @@ class DatabaseProvider extends ChangeNotifier {
   Future<void> loadCommentsAndReplies(String postId) async {
     final allComments = await _db.getCommentsAndRepliesFromFirebase(postId);
     _comments[postId] = allComments;
-    notifyListeners();
+    update();
+  }
+
+  // Stream comments and replies (real-time updates)
+  Stream<List<Comment>> getCommentsStream(String postId) {
+    return _db.getCommentsAndRepliesStream(postId);
   }
 
   // Add a comment reply
@@ -286,7 +318,7 @@ class DatabaseProvider extends ChangeNotifier {
     _blockedUsers = blockedUsersData.whereType<UserProfile>().toList();
 
     //update UI
-    notifyListeners();
+    update();
   }
 
   //block a user
@@ -301,7 +333,7 @@ class DatabaseProvider extends ChangeNotifier {
     await loadAllPosts();
 
     //update UI
-    notifyListeners();
+    update();
   }
 
   //unblock a user
@@ -316,7 +348,7 @@ class DatabaseProvider extends ChangeNotifier {
     await loadAllPosts();
 
     //update UI
-    notifyListeners();
+    update();
   }
 
   //report user and post
@@ -347,7 +379,7 @@ class DatabaseProvider extends ChangeNotifier {
     final followers = await _db.getFollowersUidsFromFirebase(uid);
     _followers[uid] = followers;
     _followersCount[uid] = followers.length;
-    notifyListeners();
+    update();
   }
 
   //load following
@@ -356,7 +388,7 @@ class DatabaseProvider extends ChangeNotifier {
     final following = await _db.getFollowingUidsFromFirebase(uid);
     _following[uid] = following;
     _followingCount[uid] = following.length;
-    notifyListeners();
+    update();
   }
 
   //follow a user
@@ -381,7 +413,7 @@ class DatabaseProvider extends ChangeNotifier {
           (_followingCount[currentUserId] ?? 0) + 1;
 
       //update the ui
-      notifyListeners();
+      update();
 
       try {
         //follow user in firebase
@@ -391,6 +423,9 @@ class DatabaseProvider extends ChangeNotifier {
         await loadFollowers(currentUserId);
         //reload target user's following
         await loadFollowing(targetUserId);
+        
+        //refresh following posts feed
+        await loadFollowingPosts();
       } catch (e) {
         //if error, undo the changes
         _followers[targetUserId]?.remove(currentUserId);
@@ -399,7 +434,7 @@ class DatabaseProvider extends ChangeNotifier {
         _following[currentUserId]!.remove(targetUserId);
         _followingCount[currentUserId] =
             (_followingCount[currentUserId] ?? 0) - 1;
-        notifyListeners();
+        update();
       }
     }
   }
@@ -427,7 +462,7 @@ class DatabaseProvider extends ChangeNotifier {
           (_followingCount[currentUserId] ?? 1) - 1;
 
       //update the ui
-      notifyListeners();
+      update();
     }
 
     try {
@@ -438,6 +473,9 @@ class DatabaseProvider extends ChangeNotifier {
       await loadFollowers(currentUserId);
       //reload target user's following
       await loadFollowing(targetUserId);
+      
+      //refresh following posts feed
+      await loadFollowingPosts();
     } catch (e) {
       //if error, undo the changes
       _followers[targetUserId]?.add(currentUserId);
@@ -445,7 +483,7 @@ class DatabaseProvider extends ChangeNotifier {
       _following[currentUserId]!.add(targetUserId);
       _followingCount[currentUserId] =
           (_followingCount[currentUserId] ?? 0) + 1;
-      notifyListeners();
+      update();
     }
   }
 
@@ -497,7 +535,7 @@ class DatabaseProvider extends ChangeNotifier {
       _followersProfile[uid] = followerProfiles;
 
       //update ui
-      notifyListeners();
+      update();
     } catch (e) {
       print(e);
     }
@@ -529,7 +567,7 @@ class DatabaseProvider extends ChangeNotifier {
       _followingProfile[uid] = followingProfiles;
 
       //update ui
-      notifyListeners();
+      update();
     } catch (e) {
       print(e);
     }
@@ -557,7 +595,7 @@ SEARCH USERS
       _searchResults = results;
 
       //update ui
-      notifyListeners();
+      update();
     } catch (e) {
       print(e);
     }
