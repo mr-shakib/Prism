@@ -8,6 +8,7 @@ import 'package:prism/screens/profile_screen.dart';
 import 'package:prism/screens/search_screen.dart';
 import 'package:prism/screens/settings_screen.dart';
 import 'package:prism/screens/create_post_screen.dart';
+import 'package:prism/screens/chat_screen.dart';
 import '../models/post.dart';
 import 'package:prism/screens/home_screen.dart';
 import '../services/auth/auth_service.dart';
@@ -108,8 +109,8 @@ class _HomePageState extends State<HomePage> {
             ),
             Container(
               child: const NavigationDestination(
-                icon: const Icon(Icons.settings),
-                label: 'Settings',
+                icon: Icon(Icons.chat_bubble_outline),
+                label: 'Chat',
               ),
             ),
             Container(
@@ -197,7 +198,7 @@ class NavigationController extends GetxController {
       const HomeScreen(),
       const SearchScreen(),
       const CreatePostScreen(),
-      SettingsScreen(),
+      const ChatScreen(),
       ProfileScreen(
         uid: _auth.getCurrentUid(),
       ),

@@ -6,6 +6,7 @@ import 'package:prism/models/user.dart';
 import 'package:prism/services/auth/auth_service.dart';
 import 'package:prism/services/cloudinary/cloudinary_service.dart';
 import 'package:prism/services/database/database_provider.dart';
+import 'package:prism/screens/settings_screen.dart';
 import 'package:prism/themes/app_colors.dart';
 import 'package:prism/themes/app_styles.dart';
 
@@ -533,8 +534,25 @@ class _ModernProfilePageState extends State<ModernProfilePage> {
               isDark: isDark,
             ),
           ),
-          if (!isOwnProfile) ...[
-            const SizedBox(width: 12),
+          const SizedBox(width: 12),
+          if (isOwnProfile)
+            Expanded(
+              flex: 1,
+              child: _buildMinimalButton(
+                label: 'Settings',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SettingsScreen(),
+                    ),
+                  );
+                },
+                isPrimary: false,
+                isDark: isDark,
+              ),
+            )
+          else
             Expanded(
               flex: 2,
               child: _buildMinimalButton(
@@ -544,7 +562,6 @@ class _ModernProfilePageState extends State<ModernProfilePage> {
                 isDark: isDark,
               ),
             ),
-          ],
         ],
       ),
     );
